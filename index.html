@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr. Crowder — Quiz Hub</title>
+<style>
+  :root {
+    --navy: #1B3A6B;
+    --navy-light: #264d8a;
+    --gold: #F5A623;
+    --gold-light: #FFD580;
+    --bg: #0e1a2b;
+    --card: #152238;
+    --text: #e8ecf1;
+    --muted: #8899aa;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --orange: #f39c12;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 32px 0 24px;
+    border-bottom: 2px solid var(--navy-light);
+    margin-bottom: 32px;
+  }
+  header h1 { font-size: 2rem; color: var(--gold); letter-spacing: 1px; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 0.95rem; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 28px; border: none; border-radius: var(--radius);
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .btn-primary { background: var(--gold); color: var(--navy); }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-secondary { background: var(--navy-light); color: var(--text); }
+  .btn-secondary:hover { background: #2f5fa0; }
+  .btn-small { padding: 8px 16px; font-size: 0.85rem; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: #c0392b; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .card h2 { color: var(--gold); margin-bottom: 16px; font-size: 1.3rem; }
+
+  /* ── Role Select ── */
+  .role-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; margin-top: 20px;
+  }
+  .role-card {
+    background: var(--card); border: 2px solid var(--navy-light);
+    border-radius: var(--radius); padding: 40px 24px;
+    text-align: center; cursor: pointer; transition: all 0.25s;
+  }
+  .role-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+  .role-card .icon { font-size: 3rem; margin-bottom: 12px; }
+  .role-card h3 { font-size: 1.2rem; margin-bottom: 6px; }
+  .role-card p { color: var(--muted); font-size: 0.85rem; }
+
+  /* ── Forms ── */
+  input, select, textarea {
+    width: 100%; padding: 12px 16px;
+    background: var(--bg); border: 1px solid var(--navy-light);
+    border-radius: 8px; color: var(--text); font-size: 1rem;
+    margin-bottom: 14px; outline: none; transition: border 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--gold); }
+  label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+
+  /* ── Quiz ── */
+  .question-card {
+    background: var(--bg); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 16px;
+    border-left: 4px solid var(--navy-light);
+  }
+  .question-card.correct { border-left-color: var(--green); background: rgba(46,204,113,0.06); }
+  .question-card.wrong { border-left-color: var(--red); background: rgba(231,76,60,0.06); }
+  .question-num { color: var(--gold); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .question-text { font-size: 1.05rem; margin-bottom: 14px; line-height: 1.5; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn {
+    display: block; width: 100%; text-align: left;
+    padding: 12px 16px; background: var(--card);
+    border: 2px solid transparent; border-radius: 8px;
+    color: var(--text); font-size: 0.95rem; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .option-btn:hover { border-color: var(--gold); }
+  .option-btn.selected { border-color: var(--gold); background: rgba(245,166,35,0.1); }
+  .option-btn.correct-answer { border-color: var(--green); background: rgba(46,204,113,0.15); }
+  .option-btn.wrong-answer { border-color: var(--red); background: rgba(231,76,60,0.15); }
+
+  /* ── Vocab matching ── */
+  .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .vocab-term {
+    padding: 14px; background: var(--bg); border-radius: 8px;
+    border: 2px solid var(--navy-light); font-weight: 600;
+  }
+  .vocab-select { margin-bottom: 0; }
+
+  /* ── Progress ── */
+  .progress-bar {
+    width: 100%; height: 8px; background: var(--navy-light);
+    border-radius: 4px; overflow: hidden; margin-bottom: 20px;
+  }
+  .progress-fill { height: 100%; background: var(--gold); transition: width 0.4s ease; border-radius: 4px; }
+
+  /* ── Score display ── */
+  .score-ring {
+    width: 160px; height: 160px; margin: 0 auto 20px;
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .score-ring svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .score-ring .pct { font-size: 2.5rem; font-weight: 800; }
+  .score-ring .grade-label { font-size: 0.9rem; color: var(--muted); }
+  .score-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+  .breakdown-item {
+    background: var(--bg); border-radius: 8px; padding: 16px; text-align: center;
+  }
+  .breakdown-item .val { font-size: 1.8rem; font-weight: 700; color: var(--gold); }
+  .breakdown-item .lbl { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── Teacher table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th {
+    background: var(--navy); color: var(--gold); padding: 12px 14px;
+    text-align: left; font-weight: 700; text-transform: uppercase;
+    font-size: 0.75rem; letter-spacing: 1px; white-space: nowrap;
+    position: sticky; top: 0;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  tr:hover td { background: rgba(245,166,35,0.04); }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 0.8rem; font-weight: 700;
+  }
+  .badge-a { background: rgba(46,204,113,0.2); color: var(--green); }
+  .badge-b { background: rgba(52,152,219,0.2); color: #3498db; }
+  .badge-c { background: rgba(243,156,18,0.2); color: var(--orange); }
+  .badge-d { background: rgba(231,76,60,0.2); color: var(--red); }
+  .badge-f { background: rgba(231,76,60,0.3); color: var(--red); }
+
+  /* ── Stats row ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--card); border-radius: var(--radius); padding: 20px; text-align: center; }
+  .stat-card .val { font-size: 2rem; font-weight: 800; color: var(--gold); }
+  .stat-card .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* ── Filter bar ── */
+  .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .filter-bar input, .filter-bar select { margin-bottom: 0; flex: 1; min-width: 150px; }
+
+  /* ── Utilities ── */
+  .text-center { text-align: center; }
+  .mt-12 { margin-top: 12px; }
+  .mt-20 { margin-top: 20px; }
+  .mb-20 { margin-bottom: 20px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .hidden { display: none !important; }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .back-link { color: var(--muted); cursor: pointer; font-size: 0.9rem; margin-bottom: 20px; display: inline-block; }
+  .back-link:hover { color: var(--gold); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 14px 24px; border-radius: var(--radius);
+    font-weight: 600; z-index: 999; animation: slideUp 0.3s ease;
+  }
+  .toast-success { background: var(--green); color: #fff; }
+  .toast-error { background: var(--red); color: #fff; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .role-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .vocab-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.5rem; }
+  }
+
+  /* ── Config banner ── */
+  .config-banner {
+    background: var(--red); color: #fff; padding: 14px 20px;
+    border-radius: var(--radius); margin-bottom: 24px;
+    text-align: center; font-weight: 600;
+  }
+  .config-banner code {
+    background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════ -->
+<!--  CONFIG: Set your Apps Script Web App URL here  -->
+<!-- ════════════════════════════════════════════════ -->
+<script>
+  // After deploying your Apps Script as a web app, paste the URL below:
+  const SCRIPT_URL = '';
+</script>
+
+<div class="container" id="app">
+
+  <!-- HEADER -->
+  <header>
+    <h1>Mr. Crowder's Quiz Hub</h1>
+    <p>Select your role to get started</p>
+  </header>
+
+  <!-- CONFIG WARNING -->
+  <div id="configWarning" class="config-banner hidden">
+    Set your Apps Script URL in the <code>SCRIPT_URL</code> variable at the top of this file.
+  </div>
+
+  <!-- ═══ SCREEN: Role Select ═══ -->
+  <div id="screenRole" class="fade-in">
+    <div class="role-grid">
+      <div class="role-card" onclick="goStudent()">
+        <div class="icon">&#x1F393;</div>
+        <h3>I'm a Student</h3>
+        <p>Take a quiz and submit your score</p>
+      </div>
+      <div class="role-card" onclick="goTeacher()">
+        <div class="icon">&#x1F4CA;</div>
+        <h3>I'm the Teacher</h3>
+        <p>View the score dashboard</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN: Student — Name + Deck ═══ -->
+  <div id="screenStudentSetup" class="hidden fade-in">
+    <span class="back-link" onclick="showScreen('screenRole')">&larr; Back</span>
+    <div class="card">
+      <h2>Before You Start</h2>
+      <label>Your Name</label>
+      <input type="text" id="studentName" placeholder="First Last" autocomplete="off">
+      <label>Select a Deck</label>
+      <select id="deckSelect">
+        <option value="">— Choose a deck —</option>
+      </select>
+      <div class="mt-20">
+        <button class="btn btn-primary" onclick="startQuiz()" style="width:100%">Start Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN: MC Quiz ═══ -->
+  <div id="screenMC" class="hidden fade-in">
+    <div class="flex-between mb-20">
+      <h2 id="mcDeckTitle" style="color:var(--gold)"></h2>
+      <span id="mcCounter" style="color:var(--muted);font-size:0.9rem"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="mcProgress"></div></div>
+    <div id="mcQuestions"></div>
+    <div class="mt-20 text-center">
+      <button class="btn btn-primary" id="mcSubmitBtn" onclick="submitMC()">Submit Answers</button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN: Vocab Match ═══ -->
+  <div id="screenVocab" class="hidden fade-in">
+    <div class="flex-between mb-20">
+      <h2 style="color:var(--gold)">Vocabulary Match</h2>
+      <span id="vocabCounter" style="color:var(--muted);font-size:0.9rem"></span>
+    </div>
+    <p style="color:var(--muted);margin-bottom:20px">Match each term to its correct definition.</p>
+    <div id="vocabItems"></div>
+    <div class="mt-20 text-center">
+      <button class="btn btn-primary" id="vocabSubmitBtn" onclick="submitVocab()">Submit Matches</button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN: Results ═══ -->
+  <div id="screenResults" class="hidden fade-in">
+    <div class="card text-center">
+      <h2>Quiz Complete!</h2>
+      <div class="score-ring" id="scoreRing">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--navy-light)" stroke-width="12"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--gold)" stroke-width="12"
+            stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round" id="scoreArc"/>
+        </svg>
+        <div style="text-align:center">
+          <div class="pct" id="scorePct">0%</div>
+          <div class="grade-label" id="scoreGrade"></div>
+        </div>
+      </div>
+      <div class="score-breakdown" id="scoreBreakdown"></div>
+      <div class="mt-20" id="resultStatus" style="color:var(--muted)"></div>
+      <div class="mt-20">
+        <button class="btn btn-secondary" onclick="showScreen('screenRole')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN: Teacher Dashboard ═══ -->
+  <div id="screenTeacher" class="hidden fade-in">
+    <span class="back-link" onclick="showScreen('screenRole')">&larr; Back</span>
+    <div class="flex-between mb-20">
+      <h2 style="color:var(--gold)">Score Dashboard</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-small" onclick="loadScores()">Refresh</button>
+        <button class="btn btn-secondary btn-small" onclick="exportCSV()">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card"><div class="val" id="statTotal">—</div><div class="lbl">Submissions</div></div>
+      <div class="stat-card"><div class="val" id="statAvg">—</div><div class="lbl">Avg Score</div></div>
+      <div class="stat-card"><div class="val" id="statHigh">—</div><div class="lbl">Highest</div></div>
+      <div class="stat-card"><div class="val" id="statLow">—</div><div class="lbl">Lowest</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="filterName" placeholder="Filter by name..." oninput="renderTable()">
+      <select id="filterDeck" onchange="renderTable()">
+        <option value="">All Decks</option>
+      </select>
+      <select id="filterGrade" onchange="renderTable()">
+        <option value="">All Grades</option>
+        <option>A</option><option>B</option><option>C</option><option>D</option><option>F</option>
+      </select>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap" style="max-height:500px;overflow-y:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th><th>Student</th><th>Deck</th>
+              <th>MC</th><th>Vocab</th><th>Total</th><th>%</th><th>Grade</th>
+            </tr>
+          </thead>
+          <tbody id="scoreBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="teacherEmpty" class="hidden text-center" style="padding:40px;color:var(--muted)">
+      No scores recorded yet.
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!--  SAMPLE DECK DATA — Replace or extend as needed -->
+<!-- ════════════════════════════════════════════════ -->
+<script>
+const DECKS = [
+  {
+    id: 'vocab-unit1',
+    title: 'Unit 1 — Vocabulary',
+    mc: [
+      {
+        q: 'What does "benevolent" mean?',
+        options: ['Hostile', 'Kind and generous', 'Indifferent', 'Fearful'],
+        answer: 1
+      },
+      {
+        q: 'Which word is a synonym for "ephemeral"?',
+        options: ['Permanent', 'Fleeting', 'Ancient', 'Solid'],
+        answer: 1
+      },
+      {
+        q: '"Ubiquitous" most closely means:',
+        options: ['Rare', 'Everywhere', 'Underground', 'Invisible'],
+        answer: 1
+      },
+      {
+        q: 'An "ambiguous" statement is:',
+        options: ['Very clear', 'Open to interpretation', 'Loudly spoken', 'Written formally'],
+        answer: 1
+      },
+      {
+        q: '"Pragmatic" describes someone who is:',
+        options: ['Dreamy', 'Practical', 'Artistic', 'Spiritual'],
+        answer: 1
+      }
+    ],
+    vocab: [
+      { term: 'Resilient', def: 'Able to recover quickly from difficulties' },
+      { term: 'Candid', def: 'Truthful and straightforward' },
+      { term: 'Verbose', def: 'Using more words than needed' },
+      { term: 'Novel', def: 'New and original' },
+      { term: 'Diligent', def: 'Showing careful and persistent effort' }
+    ]
+  },
+  {
+    id: 'vocab-unit2',
+    title: 'Unit 2 — Literary Terms',
+    mc: [
+      {
+        q: 'A comparison using "like" or "as" is a:',
+        options: ['Metaphor', 'Simile', 'Hyperbole', 'Personification'],
+        answer: 1
+      },
+      {
+        q: 'Giving human qualities to non-human things is:',
+        options: ['Simile', 'Alliteration', 'Personification', 'Irony'],
+        answer: 2
+      },
+      {
+        q: 'An extreme exaggeration is called:',
+        options: ['Understatement', 'Hyperbole', 'Oxymoron', 'Paradox'],
+        answer: 1
+      },
+      {
+        q: 'The central message of a story is its:',
+        options: ['Plot', 'Setting', 'Theme', 'Conflict'],
+        answer: 2
+      },
+      {
+        q: 'A character who opposes the protagonist is the:',
+        options: ['Narrator', 'Foil', 'Antagonist', 'Bystander'],
+        answer: 2
+      }
+    ],
+    vocab: [
+      { term: 'Allegory', def: 'A story with a hidden moral or political meaning' },
+      { term: 'Foreshadowing', def: 'A warning or hint of a future event' },
+      { term: 'Juxtaposition', def: 'Placing two things side by side for comparison' },
+      { term: 'Motif', def: 'A recurring element with symbolic significance' },
+      { term: 'Tone', def: "The author's attitude toward the subject" }
+    ]
+  }
+];
+</script>
+
+<!-- ════════════════════════════ -->
+<!--  APP LOGIC                  -->
+<!-- ════════════════════════════ -->
+<script>
+// ── State ──
+let currentDeck = null;
+let mcAnswers = {};
+let vocabAnswers = {};
+let allScores = [];
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', () => {
+  if (!SCRIPT_URL) document.getElementById('configWarning').classList.remove('hidden');
+  populateDeckSelect();
+});
+
+function populateDeckSelect() {
+  const sel = document.getElementById('deckSelect');
+  DECKS.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.id;
+    opt.textContent = d.title;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Navigation ──
+function showScreen(id) {
+  document.querySelectorAll('[id^="screen"]').forEach(el => el.classList.add('hidden'));
+  const screen = document.getElementById(id);
+  screen.classList.remove('hidden');
+  screen.classList.remove('fade-in');
+  void screen.offsetWidth;
+  screen.classList.add('fade-in');
+}
+
+function goStudent() { showScreen('screenStudentSetup'); }
+
+function goTeacher() {
+  showScreen('screenTeacher');
+  loadScores();
+}
+
+// ── Start Quiz ──
+function startQuiz() {
+  const name = document.getElementById('studentName').value.trim();
+  const deckId = document.getElementById('deckSelect').value;
+  if (!name) return toast('Enter your name', 'error');
+  if (!deckId) return toast('Select a deck', 'error');
+  currentDeck = DECKS.find(d => d.id === deckId);
+  mcAnswers = {};
+  vocabAnswers = {};
+  renderMC();
+  showScreen('screenMC');
+}
+
+// ── MC Quiz ──
+function renderMC() {
+  const wrap = document.getElementById('mcQuestions');
+  wrap.innerHTML = '';
+  document.getElementById('mcDeckTitle').textContent = currentDeck.title;
+  document.getElementById('mcCounter').textContent = `${currentDeck.mc.length} questions`;
+  document.getElementById('mcProgress').style.width = '0%';
+
+  currentDeck.mc.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'question-card';
+    div.id = `mc-q-${i}`;
+    div.innerHTML = `
+      <div class="question-num">Question ${i + 1}</div>
+      <div class="question-text">${item.q}</div>
+      <div class="options">
+        ${item.options.map((opt, j) => `
+          <button class="option-btn" data-q="${i}" data-opt="${j}" onclick="selectMC(${i},${j})">${opt}</button>
+        `).join('')}
+      </div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+function selectMC(q, opt) {
+  mcAnswers[q] = opt;
+  document.querySelectorAll(`[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+  document.querySelector(`[data-q="${q}"][data-opt="${opt}"]`).classList.add('selected');
+  const answered = Object.keys(mcAnswers).length;
+  document.getElementById('mcProgress').style.width = `${(answered / currentDeck.mc.length) * 100}%`;
+}
+
+function submitMC() {
+  if (Object.keys(mcAnswers).length < currentDeck.mc.length) {
+    return toast('Answer all questions first', 'error');
+  }
+  // Show correct/wrong
+  currentDeck.mc.forEach((item, i) => {
+    const card = document.getElementById(`mc-q-${i}`);
+    const correct = mcAnswers[i] === item.answer;
+    card.classList.add(correct ? 'correct' : 'wrong');
+    document.querySelector(`[data-q="${i}"][data-opt="${item.answer}"]`).classList.add('correct-answer');
+    if (!correct) {
+      document.querySelector(`[data-q="${i}"][data-opt="${mcAnswers[i]}"]`).classList.add('wrong-answer');
+    }
+  });
+  document.getElementById('mcSubmitBtn').classList.add('hidden');
+
+  // Move to vocab after a pause
+  setTimeout(() => {
+    if (currentDeck.vocab.length > 0) {
+      renderVocab();
+      showScreen('screenVocab');
+    } else {
+      showResults();
+    }
+  }, 1500);
+}
+
+// ── Vocab Match ──
+function renderVocab() {
+  const wrap = document.getElementById('vocabItems');
+  wrap.innerHTML = '';
+  document.getElementById('vocabCounter').textContent = `${currentDeck.vocab.length} terms`;
+
+  // Shuffle definitions for dropdown
+  const shuffledDefs = [...currentDeck.vocab].sort(() => Math.random() - 0.5);
+
+  currentDeck.vocab.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'vocab-grid';
+    row.style.marginBottom = '12px';
+    row.innerHTML = `
+      <div class="vocab-term">${item.term}</div>
+      <select class="vocab-select" data-vi="${i}" onchange="vocabAnswers[${i}]=this.value">
+        <option value="">— Select —</option>
+        ${shuffledDefs.map(d => `<option value="${d.def}">${d.def}</option>`).join('')}
+      </select>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function submitVocab() {
+  const unanswered = currentDeck.vocab.some((_, i) => !vocabAnswers[i]);
+  if (unanswered) return toast('Match all terms first', 'error');
+  showResults();
+}
+
+// ── Results ──
+function showResults() {
+  let mcCorrect = 0;
+  currentDeck.mc.forEach((item, i) => { if (mcAnswers[i] === item.answer) mcCorrect++; });
+
+  let vocabCorrect = 0;
+  currentDeck.vocab.forEach((item, i) => { if (vocabAnswers[i] === item.def) vocabCorrect++; });
+
+  const total = mcCorrect + vocabCorrect;
+  const max = currentDeck.mc.length + currentDeck.vocab.length;
+  const pct = Math.round((total / max) * 100);
+  const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
+
+  showScreen('screenResults');
+
+  // Animate ring
+  const arc = document.getElementById('scoreArc');
+  const circumference = 2 * Math.PI * 70; // ~440
+  setTimeout(() => {
+    arc.style.transition = 'stroke-dashoffset 1s ease';
+    arc.style.strokeDashoffset = circumference - (circumference * pct / 100);
+  }, 100);
+
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreGrade').textContent = 'Grade: ' + grade;
+
+  document.getElementById('scoreBreakdown').innerHTML = `
+    <div class="breakdown-item"><div class="val">${mcCorrect}/${currentDeck.mc.length}</div><div class="lbl">Multiple Choice</div></div>
+    <div class="breakdown-item"><div class="val">${vocabCorrect}/${currentDeck.vocab.length}</div><div class="lbl">Vocabulary</div></div>
+  `;
+
+  // POST to Apps Script
+  const payload = {
+    name: document.getElementById('studentName').value.trim(),
+    deckId: currentDeck.id,
+    deckTitle: currentDeck.title,
+    mcScore: mcCorrect,
+    mcMax: currentDeck.mc.length,
+    vocabScore: vocabCorrect,
+    vocabMax: currentDeck.vocab.length,
+    total: total,
+    max: max,
+    pct: pct,
+    grade: grade
+  };
+
+  const status = document.getElementById('resultStatus');
+
+  if (!SCRIPT_URL) {
+    status.textContent = 'Score not saved — no Script URL configured.';
+    return;
+  }
+
+  status.textContent = 'Saving score...';
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  })
+  .then(() => { status.textContent = 'Score saved!'; status.style.color = 'var(--green)'; })
+  .catch(() => { status.textContent = 'Could not save score.'; status.style.color = 'var(--red)'; });
+}
+
+// ── Teacher Dashboard ──
+function loadScores() {
+  if (!SCRIPT_URL) {
+    document.getElementById('teacherEmpty').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('scoreBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Loading...</td></tr>';
+
+  fetch(SCRIPT_URL)
+    .then(r => r.json())
+    .then(data => {
+      allScores = data;
+      populateDeckFilter();
+      computeStats();
+      renderTable();
+    })
+    .catch(() => {
+      document.getElementById('scoreBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:30px">Failed to load scores</td></tr>';
+    });
+}
+
+function populateDeckFilter() {
+  const sel = document.getElementById('filterDeck');
+  const existing = new Set([...sel.options].map(o => o.value));
+  const decks = [...new Set(allScores.map(s => s.deckTitle))];
+  decks.forEach(d => {
+    if (!existing.has(d)) {
+      const opt = document.createElement('option');
+      opt.value = d; opt.textContent = d;
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function computeStats() {
+  const n = allScores.length;
+  document.getElementById('statTotal').textContent = n;
+  if (n === 0) {
+    document.getElementById('statAvg').textContent = '—';
+    document.getElementById('statHigh').textContent = '—';
+    document.getElementById('statLow').textContent = '—';
+    return;
+  }
+  const pcts = allScores.map(s => s.pct || 0);
+  document.getElementById('statAvg').textContent = Math.round(pcts.reduce((a, b) => a + b, 0) / n) + '%';
+  document.getElementById('statHigh').textContent = Math.max(...pcts) + '%';
+  document.getElementById('statLow').textContent = Math.min(...pcts) + '%';
+}
+
+function renderTable() {
+  const nameFilter = document.getElementById('filterName').value.toLowerCase();
+  const deckFilter = document.getElementById('filterDeck').value;
+  const gradeFilter = document.getElementById('filterGrade').value;
+
+  let filtered = allScores.filter(s => {
+    if (nameFilter && !s.name.toLowerCase().includes(nameFilter)) return false;
+    if (deckFilter && s.deckTitle !== deckFilter) return false;
+    if (gradeFilter && s.grade !== gradeFilter) return false;
+    return true;
+  });
+
+  const body = document.getElementById('scoreBody');
+  const empty = document.getElementById('teacherEmpty');
+
+  if (filtered.length === 0) {
+    body.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  body.innerHTML = filtered.map(s => `
+    <tr>
+      <td style="white-space:nowrap">${s.submittedAt || '—'}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.deckTitle}</td>
+      <td>${s.mcScore}/${s.mcMax}</td>
+      <td>${s.vocabScore}/${s.vocabMax}</td>
+      <td>${s.total}/${s.max}</td>
+      <td>${s.pct}%</td>
+      <td><span class="badge badge-${(s.grade || 'f').toLowerCase()}">${s.grade}</span></td>
+    </tr>
+  `).join('');
+}
+
+function exportCSV() {
+  if (allScores.length === 0) return toast('No data to export', 'error');
+  const header = 'Timestamp,Student,Deck,MC Score,MC Max,Vocab Score,Vocab Max,Total,Max,Percent,Grade';
+  const rows = allScores.map(s =>
+    `"${s.submittedAt}","${s.name}","${s.deckTitle}",${s.mcScore},${s.mcMax},${s.vocabScore},${s.vocabMax},${s.total},${s.max},${s.pct},${s.grade}`
+  );
+  const blob = new Blob([header + '\n' + rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quiz-scores-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ── Toast ──
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+</script>
+
+</body>
+</html>
