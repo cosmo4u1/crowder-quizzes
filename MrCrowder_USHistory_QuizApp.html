@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US History Check-In Quizzes — Mr. Crowder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #1B3A6B;
+    --navy-dk: #0F2347;
+    --navy-lt: #2a5298;
+    --red:     #B22234;
+    --gold:    #C89B2A;
+    --gold-lt: #F5E6A3;
+    --white:   #FFFFFF;
+    --cream:   #F8F6F0;
+    --gray:    #E8E4DA;
+    --text:    #1A1A2E;
+    --muted:   #6B6B80;
+    --green:   #1A6B3A;
+    --purple:  #5B2D8E;
+    --correct: #C6EFCE;
+    --correct-t:#276221;
+    --wrong:   #FFC7CE;
+    --wrong-t: #9C0006;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── LAYOUT ── */
+  .page { display: none; }
+  .page.active { display: block; }
+  .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .container-sm { max-width: 500px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* ── HOME ── */
+  .home-hero {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--red) 33%, var(--gold) 33% 66%, var(--red) 66%);
+  }
+  .home-hero .eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-lt);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  .home-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+  }
+  .home-hero p { font-size: 1rem; color: #C8D8F0; margin-bottom: 0; }
+
+  /* ── FORMS ── */
+  .field { margin-bottom: 1.25rem; }
+  .field label { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; }
+  .field input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--gray);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--white);
+    color: var(--text);
+    transition: border-color .2s;
+    outline: none;
+  }
+  .field input:focus { border-color: var(--navy); }
+  .field input[type="password"] { letter-spacing: 2px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-block;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .1s, opacity .15s;
+  }
+  .btn:hover { opacity: .88; }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .4; cursor: default; transform: none; }
+  .btn-primary { background: var(--navy); color: var(--white); }
+  .btn-success { background: var(--green); color: var(--white); }
+  .btn-danger  { background: var(--red);   color: var(--white); }
+  .btn-ghost   { background: transparent; border: 1.5px solid var(--gray); color: var(--muted); }
+  .btn-gold    { background: var(--gold);  color: var(--navy-dk); }
+  .btn-full    { width: 100%; display: block; text-align: center; }
+  .btn-sm      { padding: 7px 14px; font-size: .85rem; }
+
+  /* ── DECK GRID ── */
+  .deck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .deck-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color .15s, box-shadow .15s, transform .1s;
+  }
+  .deck-card:hover {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(27,58,107,.12);
+    transform: translateY(-1px);
+  }
+  .deck-badge {
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .deck-info .deck-title { font-weight: 600; font-size: .95rem; color: var(--text); }
+  .deck-info .deck-meta  { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── QUIZ SHELL ── */
+  .quiz-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .quiz-header-left { display: flex; align-items: center; gap: 12px; }
+  .quiz-header h2 { font-size: 1rem; font-weight: 600; }
+  .quiz-header .slide-count { font-size: .85rem; color: #C8D8F0; }
+  .progress-wrap { height: 4px; background: rgba(255,255,255,.2); }
+  .progress-fill { height: 4px; background: var(--gold); transition: width .35s ease; }
+  .answer-status { font-size: .8rem; background: rgba(255,255,255,.12); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+
+  .quiz-body { max-width: 780px; margin: 0 auto; padding: 1.5rem; }
+
+  .quiz-nav {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ── SLIDE TYPES ── */
+  .slide-cover {
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 3.5rem 3rem;
+    text-align: center;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+  }
+  .slide-cover::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--red) 33%, var(--gold) 33% 66%, var(--red) 66%);
+  }
+  .slide-cover .eyebrow { font-size: .75rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 1rem; }
+  .slide-cover h2 { font-family: 'Playfair Display', serif; font-size: 2.4rem; line-height: 1.15; margin-bottom: 1rem; }
+  .slide-cover p { color: #C8D8F0; font-size: 1rem; margin-bottom: 2rem; }
+
+  .slide-goals { }
+  .slide-goals .goals-header {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .slide-goals .goals-body {
+    background: var(--white);
+    border: 1.5px solid var(--gray);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 20px;
+  }
+  .goal-item { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .goal-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--navy); color: var(--white);
+    font-weight: 700; font-size: .85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .goal-text { font-size: 1rem; line-height: 1.55; padding-top: 3px; }
+
+  .slide-content { }
+  .content-header {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .content-body {
+    background: var(--white);
+    border: 1.5px solid var(--gray);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+  }
+  .content-pts { flex: 1; }
+  .pt-item { display: flex; gap: 10px; margin-bottom: 13px; }
+  .pt-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; margin-top: 8px; }
+  .pt-text { font-size: 1.05rem; line-height: 1.6; }
+  .key-term-box {
+    width: 210px;
+    flex-shrink: 0;
+    background: #FDF8E7;
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 16px;
+    align-self: flex-start;
+  }
+  .key-term-label { font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; color: #7A6010; font-weight: 700; margin-bottom: 8px; }
+  .key-term-name { color: var(--red); font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+  .key-term-def { font-size: .9rem; line-height: 1.55; color: var(--text); }
+
+  .slide-mc { }
+  .mc-badge { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .mc-badge .qnum {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--gold); color: var(--navy-dk);
+    font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+  }
+  .mc-badge .qlabel { font-weight: 600; font-size: .85rem; color: var(--muted); }
+  .mc-question {
+    background: #1E3060;
+    border: 1px solid #2a4a90;
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.45;
+    margin-bottom: 16px;
+  }
+  .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 2px solid var(--gray);
+    border-radius: 10px;
+    background: var(--white);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s, background .15s, transform .1s;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .choice-btn:hover:not(.selected) { border-color: var(--navy); background: #f0f4ff; transform: translateY(-1px); }
+  .choice-btn.selected { border-width: 2.5px; }
+  .choice-letter {
+    width: 34px; height: 34px; border-radius: 8px;
+    font-weight: 700; font-size: 1rem;
+    color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .choice-text { font-size: .9rem; line-height: 1.4; }
+  .mc-feedback {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--cream);
+    font-size: .9rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .slide-vocab { }
+  .vocab-header {
+    background: var(--purple);
+    color: var(--white);
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .vocab-body {
+    background: var(--white);
+    border: 1.5px solid var(--gray);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 20px;
+  }
+  .vocab-instruction { font-size: .9rem; color: var(--muted); font-style: italic; margin-bottom: 16px; }
+  .vocab-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .vocab-col-label { font-size: .75rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
+  .vocab-term-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--gray);
+    border-radius: 10px;
+    background: var(--white);
+    margin-bottom: 8px;
+  }
+  .vt-num {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: var(--navy); color: var(--white);
+    font-weight: 700; font-size: .9rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .vt-name { font-weight: 600; font-size: .9rem; flex: 1; }
+  .vt-btns { display: flex; gap: 5px; }
+  .vt-btn {
+    width: 32px; height: 32px;
+    border-radius: 7px;
+    border: 2px solid var(--gray);
+    background: transparent;
+    font-weight: 700;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .vt-btn:hover { border-color: var(--navy); background: #f0f4ff; }
+  .vt-btn.sel { color: var(--white); border-color: transparent; }
+  .def-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--gray);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: var(--white);
+    font-size: .88rem;
+    line-height: 1.5;
+  }
+  .def-letter {
+    width: 28px; height: 28px; border-radius: 7px;
+    color: var(--white); font-weight: 700; font-size: .85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── SUBMIT SCREEN ── */
+  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .score-card { background: var(--white); border: 1.5px solid var(--gray); border-radius: 12px; padding: 18px 12px; text-align: center; }
+  .score-big { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+  .score-max { font-size: .9rem; color: var(--muted); }
+  .score-label { font-size: .8rem; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .score-pct { font-size: 1rem; font-weight: 700; margin-top: 4px; }
+
+  .warning-box { background: #FFF8E1; border: 1.5px solid var(--gold); border-radius: 10px; padding: 14px 16px; font-size: .9rem; color: #7A5010; margin-bottom: 16px; }
+  .success-box { background: #E8F5E9; border: 1.5px solid var(--green); border-radius: 10px; padding: 14px 16px; font-size: .95rem; color: var(--green); text-align: center; font-weight: 600; margin-bottom: 16px; }
+
+  /* ── TEACHER DASHBOARD ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--white); border: 1.5px solid var(--gray); border-radius: 10px; padding: 14px; }
+  .stat-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: .9rem; background: var(--white); border-radius: 12px; overflow: hidden; border: 1.5px solid var(--gray); }
+  .data-table th { background: var(--navy); color: var(--white); padding: 10px 14px; text-align: left; font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .5px; }
+  .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--gray); color: var(--text); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--cream); }
+  .deck-pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .78rem; font-weight: 600; background: #E8F0FE; color: var(--navy); }
+  .grade-a  { color: var(--green); font-weight: 700; }
+  .grade-b  { color: #1565C0;     font-weight: 700; }
+  .grade-c  { color: var(--gold); font-weight: 700; }
+  .grade-d  { color: var(--red);  font-weight: 700; }
+  .grade-f  { color: #888;        font-weight: 700; }
+
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .toolbar-title { flex: 1; }
+
+  /* ── MISC ── */
+  .page-heading { margin-bottom: 1.5rem; }
+  .page-heading h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; }
+  .page-heading p  { color: var(--muted); margin-top: 4px; }
+
+  .divider { height: 1px; background: var(--gray); margin: 1.5rem 0; }
+  .link-btn { background: none; border: none; color: var(--navy); font-family: inherit; font-size: .9rem; cursor: pointer; text-decoration: underline; padding: 0; }
+
+  @media (max-width: 600px) {
+    .choices-grid { grid-template-columns: 1fr; }
+    .vocab-cols    { grid-template-columns: 1fr; }
+    .score-grid    { grid-template-columns: 1fr; }
+    .stat-grid     { grid-template-columns: repeat(2, 1fr); }
+    .slide-cover h2 { font-size: 1.8rem; }
+    .home-hero h1   { font-size: 2rem; }
+    .content-body   { flex-direction: column; }
+    .key-term-box   { width: 100%; }
+    .data-table th:nth-child(n+5),
+    .data-table td:nth-child(n+5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HOME ══════════════════ -->
+<div id="page-home" class="page active">
+<div class="container-sm">
+  <div class="home-hero">
+    <div class="eyebrow">Mr. Crowder · US History · 11th Grade</div>
+    <h1>Check-In Quizzes</h1>
+    <p>Read the slides, answer the questions, and submit your score directly to Mr. Crowder</p>
+  </div>
+  <div class="field">
+    <label>Your Full Name</label>
+    <input type="text" id="student-name" placeholder="e.g. Jane Smith" autocomplete="off">
+  </div>
+  <button class="btn btn-primary btn-full" id="btn-start" onclick="startStudent()" disabled>Start →</button>
+  <div style="text-align:center;margin-top:1.5rem;">
+    <button class="link-btn" onclick="showPage('page-teacher-login')">Teacher Dashboard (Mr. Crowder)</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════ DECK SELECT ══════════════════ -->
+<div id="page-select" class="page">
+<div class="container">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+    <button class="btn btn-ghost btn-sm" onclick="showPage('page-home')">← Back</button>
+    <div class="page-heading" style="margin:0">
+      <h2 id="select-greeting">Welcome!</h2>
+      <p>Choose your presentation below</p>
+    </div>
+  </div>
+  <div class="deck-grid" id="deck-grid"></div>
+</div>
+</div>
+
+<!-- ══════════════════ QUIZ ══════════════════ -->
+<div id="page-quiz" class="page">
+  <div class="quiz-header">
+    <div class="quiz-header-left">
+      <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="showPage('page-select')">← Decks</button>
+      <div>
+        <h2 id="quiz-title">Presentation</h2>
+        <div class="slide-count" id="quiz-slide-count">Slide 1 of 10</div>
+      </div>
+    </div>
+    <span class="answer-status" id="answer-status">0/0 answered</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-fill" id="quiz-progress" style="width:0%"></div>
+  </div>
+  <div class="quiz-body" id="quiz-slide-area"></div>
+  <div class="quiz-nav">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevSlide()">← Back</button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextSlide()">Next →</button>
+  </div>
+</div>
+
+<!-- ══════════════════ SUBMIT ══════════════════ -->
+<div id="page-submit" class="page">
+<div class="container-sm">
+  <div style="text-align:center;margin-bottom:1.5rem;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;margin-bottom:4px">Your Score Summary</div>
+    <div style="color:var(--muted);font-size:.95rem" id="submit-deck-name"></div>
+  </div>
+  <div class="score-grid" id="score-grid"></div>
+  <div id="submit-warning" class="warning-box" style="display:none"></div>
+  <div id="submit-success" class="success-box" style="display:none">Score submitted to Mr. Crowder!</div>
+  <button class="btn btn-success btn-full" id="btn-submit" onclick="submitScore()" style="margin-bottom:10px">Submit Score to Mr. Crowder →</button>
+  <button class="btn btn-ghost btn-full" onclick="showPage('page-select')">← Choose Another Presentation</button>
+</div>
+</div>
+
+<!-- ══════════════════ TEACHER LOGIN ══════════════════ -->
+<div id="page-teacher-login" class="page">
+<div class="container-sm">
+  <button class="btn btn-ghost btn-sm" onclick="showPage('page-home')" style="margin-bottom:1.5rem">← Back</button>
+  <div style="background:var(--white);border:1.5px solid var(--gray);border-radius:14px;padding:2rem;">
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:.4rem">Teacher Dashboard</h2>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.5rem">Enter your access code to view student scores.</p>
+    <div class="field">
+      <label>Access Code</label>
+      <input type="password" id="teacher-code" placeholder="Enter code" onkeydown="if(event.key==='Enter')teacherLogin()">
+    </div>
+    <div id="teacher-err" style="color:var(--red);font-size:.875rem;margin-bottom:10px;display:none">Incorrect code. Please try again.</div>
+    <button class="btn btn-primary btn-full" onclick="teacherLogin()">Access Dashboard</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════ TEACHER DASHBOARD ══════════════════ -->
+<div id="page-teacher" class="page">
+<div class="container">
+  <div class="toolbar">
+    <button class="btn btn-ghost btn-sm" onclick="showPage('page-home')">← Back</button>
+    <div class="toolbar-title">
+      <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700">Teacher Dashboard</div>
+      <div style="font-size:.85rem;color:var(--muted)" id="dash-subtitle">Mr. Crowder · US History</div>
+    </div>
+    <button class="btn btn-sm" style="background:#1A6B3A;color:#fff" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadSubmissions()">Refresh</button>
+    <button class="btn btn-danger btn-sm" onclick="clearAll()">Clear All</button>
+  </div>
+  <div class="stat-grid" id="stat-grid">
+    <div class="stat-card"><div class="stat-label">Submissions</div><div class="stat-val" id="stat-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Grade</div><div class="stat-val" id="stat-avg">—</div></div>
+    <div class="stat-card"><div class="stat-label">Top Score</div><div class="stat-val" id="stat-top">—</div></div>
+    <div class="stat-card"><div class="stat-label">Decks Covered</div><div class="stat-val" id="stat-decks">—</div></div>
+  </div>
+  <div id="teacher-table-wrap"></div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════
+const AC = ["#1B3A6B","#B22234","#1A6B3A","#C89B2A"];
+const AN = ["A","B","C","D"];
+
+const DECKS = [
+{id:"A",title:"The First Settlers",
+ goals:["Identify who the first people in America were","Explain why Europeans came to the Americas","Describe the impact of European settlement on Native Americans","Define key vocabulary: Indigenous, Settler, Colony, Exploration"],
+ slides:[
+  {type:"content",heading:"Native Americans: The First People",pts:["Native Americans lived in America for thousands of years before Europeans arrived.","They had hundreds of different tribes, languages, and cultures.","They hunted, farmed, fished, and had rich trade networks.","Their lives were deeply connected to the land and nature."],kt:"Indigenous",kd:"People who originally lived in a place before others arrived."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"Why Did Europeans Come to America?",pts:["Wealth — Gold, silver, and valuable resources","Religion — Freedom to practice their own faith","Land — Europe was crowded; America had open spaces","Power — Nations competed to claim as much territory as possible","Adventure — Some simply wanted to explore unknown lands"]},
+  {type:"mc",qi:1},
+  {type:"content",heading:"English Settlements Begin",pts:["Jamestown, Virginia (1607) — First permanent English settlement.","Settlers survived by learning to grow tobacco.","Pilgrims founded Plymouth Colony (1620) seeking religious freedom.","Pilgrims wrote the Mayflower Compact — early self-government.","These settlements became the 13 American Colonies."],kt:"Jamestown (1607)",kd:"The first permanent English settlement in North America."},
+  {type:"mc",qi:2},{type:"vocab"}],
+ questions:[
+  {q:"Who were the FIRST people to live in America?",ch:["Spanish Explorers — arrived in 1492","Native Americans — lived here for thousands of years","English Settlers — founded the first colonies","French Traders — explored the Mississippi River"],c:1},
+  {q:"Why did Europeans FIRST come to America?",ch:["To escape cold weather","To help Native Americans build cities","For wealth, land, and religious freedom","To start a democracy"],c:2},
+  {q:"What was the FIRST permanent English settlement?",ch:["Plymouth Colony — Pilgrims in 1620","Boston — a major colonial city","Philadelphia — founded by William Penn","Jamestown — founded in Virginia in 1607"],c:3}],
+ vocab:[{t:"Indigenous",d:"People who originally lived in a place before others arrived."},{t:"Settler",d:"A person who moves to a new land to live permanently."},{t:"Colony",d:"A territory controlled by another country far away."},{t:"Exploration",d:"Traveling to discover new lands and places."}],
+ sc:[2,0,3,1]},
+
+{id:"B",title:"US History & Geography",
+ goals:["Identify major geographic features of the United States","Explain how mountains, rivers, and plains shaped American history","Describe the importance of the Mississippi River and Great Plains","Define key vocabulary: Geography, Boundary, Trade Route, Proclamation"],
+ slides:[
+  {type:"content",heading:"The Appalachian Mountains",pts:["Appalachians run along the eastern side of North America.","The 13 colonies were built east of the Appalachians.","These mountains formed a natural barrier slowing westward expansion.","Britain's Proclamation of 1763 forbade settling west of the Appalachians."],kt:"Appalachian Mountains",kd:"Mountain range forming a natural barrier for early colonists."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"The Great Plains & Mississippi River",pts:["Great Plains: flat grasslands from the Mississippi to the Rockies.","Gained through the Louisiana Purchase (1803) — 'Breadbasket of America.'","Mississippi River flows south from Minnesota to the Gulf of Mexico.","Farmers shipped goods down the river to New Orleans for worldwide trade."],kt:"Mississippi River",kd:"Major U.S. river — crucial for trade and transportation."},
+  {type:"mc",qi:1},
+  {type:"content",heading:"The Great Lakes & Rocky Mountains",pts:["Great Lakes: Five huge freshwater lakes — Superior, Michigan, Huron, Erie, Ontario.","They provided transportation, fishing, and fresh water.","Rocky Mountains: Large mountain range in the western United States.","The Rockies were a major challenge for settlers moving west."]},
+  {type:"mc",qi:2},{type:"vocab"}],
+ questions:[
+  {q:"What did Britain's Proclamation of 1763 forbid?",ch:["Fishing in the Great Lakes","Settling west of the Appalachian Mountains","Trading goods with France or Spain","Printing newspapers in the colonies"],c:1},
+  {q:"Why was the Mississippi River so important to early Americans?",ch:["It was a defense wall against British attacks","Used for swimming and recreation","A major trade route — farmers shipped goods south to New Orleans","It formed the western border of the 13 colonies"],c:2},
+  {q:"Which geographic feature earned the nickname 'Breadbasket of America'?",ch:["The Appalachian Mountains","The Great Lakes","The Great Plains — flat grasslands perfect for growing grain","The Rocky Mountains"],c:2}],
+ vocab:[{t:"Geography",d:"The study of Earth's features — mountains, rivers, plains, and more."},{t:"Boundary",d:"A line that separates one area from another."},{t:"Trade Route",d:"A path used to move and sell goods from one place to another."},{t:"Proclamation",d:"An official announcement or order made by a government."}],
+ sc:[1,3,0,2]},
+
+{id:"C",title:"Origins of American Democracy",
+ goals:["Explain how ancient Greece and Rome influenced American government","Describe the ideas of John Locke and Montesquieu","Identify early examples of self-government in the colonies","Define key vocabulary: Democracy, Republic, Natural Rights, Self-Government"],
+ slides:[
+  {type:"content",heading:"Ideas from Ancient Greece & Rome",pts:["Ancient Greece invented democracy — citizens voted on important decisions.","Athens had one of the first democratic governments in history.","Ancient Rome created a Republic — citizens voted for representatives.","These ideas influenced America's founders directly."],kt:"Democracy",kd:"A government where the PEOPLE hold the power and choose their leaders."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"John Locke — Natural Rights",pts:["John Locke believed all people are BORN good and deserve basic rights.","He called these 'Natural Rights': Life, Liberty, and Property.","Government's job is to PROTECT these rights — not take them away.","If a government fails, the people have the right to overthrow it.","Thomas Jefferson used Locke's ideas in the Declaration of Independence."],kt:"John Locke",kd:"English philosopher — all people have natural rights to Life, Liberty, and Property."},
+  {type:"mc",qi:1},
+  {type:"content",heading:"Montesquieu & Self-Government in the Colonies",pts:["Montesquieu proposed splitting government into 3 branches: Legislative, Executive, Judicial.","Mayflower Compact (1620): Pilgrims agreed to govern themselves by majority rule.","Virginia House of Burgesses (1619): Colonists elected representatives to make laws.","New England Town Meetings: Citizens voted on local issues."]},
+  {type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"Which ancient civilization FIRST created democracy?",ch:["Ancient Rome — invented the Republic","Ancient Egypt — pharaohs allowed voting","Ancient Greece — citizens in Athens voted on laws","Ancient England — Parliament was first"],c:2},
+  {q:"According to John Locke, what are the three Natural Rights?",ch:["Speech, religion, and the right to vote","Life, liberty, and property","Wealth, power, and land ownership","Safety, education, and healthcare"],c:1},
+  {q:"What is the separation of powers?",ch:["Dividing land equally between all 13 states","Splitting the military into branches","Dividing government into 3 branches so no one has too much power","Separating church from state government"],c:2},
+  {q:"What did the Mayflower Compact establish?",ch:["Rules for the Revolutionary War","A trade agreement with England","Self-government — the Pilgrims made their own laws","A peace treaty with Native Americans"],c:2}],
+ vocab:[{t:"Democracy",d:"A government where the PEOPLE hold the power and choose their leaders."},{t:"Republic",d:"A government where people elect representatives to make laws."},{t:"Natural Rights",d:"Rights every person is born with — life, liberty, and property."},{t:"Self-Government",d:"When a group of people make their own laws and rules."}],
+ sc:[3,1,0,2]},
+
+{id:"D",title:"The 13 Colonies",
+ goals:["Explain what a colony is and why Britain created them","Describe the system of mercantilism and how it worked","Identify the three colonial regions and their economies","Define key vocabulary: Colony, Colonist, Mercantilism, Cash Crop"],
+ slides:[
+  {type:"content",heading:"Mercantilism: Why Have Colonies?",pts:["A colony is a settlement in a new area controlled by a faraway country.","Mercantilism: colonies exist to benefit the 'mother country' — England.","Colonies ship raw materials (wood, tobacco, cotton) to England.","England sold finished goods back — making England very rich."],kt:"Mercantilism",kd:"System where colonies exist to make the mother country wealthy."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"Jamestown & Plymouth Colony",pts:["Jamestown (1607): First permanent English settlement in Virginia.","Settlers survived by learning to grow tobacco.","Plymouth Colony (1620): Pilgrims seeking religious freedom.","Pilgrims wrote the Mayflower Compact — early form of self-government."],kt:"Mayflower Compact",kd:"Written agreement by the Pilgrims to govern themselves by majority rule."},
+  {type:"mc",qi:1},
+  {type:"content",heading:"The Three Colonial Regions",pts:["New England (MA, NH, RI, CT): Cold winters, rocky soil — fishing, shipbuilding.","Middle Colonies (NY, NJ, PA, DE): Warmer climate — farming, textiles; 'Breadbasket.'","Southern Colonies (MD, VA, NC, SC, GA): Warmest climate — large plantations, cash crops.","Plantations used enslaved African labor — a deeply unjust system."]},
+  {type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"What is mercantilism?",ch:["All countries trade equally","Colonies exist mainly to make the mother country wealthy","A type of farming on large plantations","The right to trade freely with any nation"],c:1},
+  {q:"Which document did the Pilgrims write before landing in America?",ch:["The Declaration of Independence","The Bill of Rights","The Mayflower Compact — an agreement for self-government","The Constitution"],c:2},
+  {q:"Which colonial region had the WARMEST climate and large plantations?",ch:["New England Colonies","Middle Colonies — the 'Breadbasket'","Southern Colonies — warmest climate and large plantations","Western Frontier"],c:2},
+  {q:"Why did people leave England to come to America?",ch:["England paid colonists to move","They wanted religious freedom, land, and economic opportunity","England forced people to leave as punishment","They were searching for a passage to Asia"],c:1}],
+ vocab:[{t:"Colony",d:"A settlement in a new land controlled by another country."},{t:"Colonist",d:"A person who moves to and settles in a colony."},{t:"Mercantilism",d:"System where colonies exist to make the mother country wealthy."},{t:"Cash Crop",d:"A crop grown to sell for money — tobacco, rice, cotton."}],
+ sc:[2,0,3,1]},
+
+{id:"E",title:"The Long Road to Revolution",
+ goals:["Explain the causes of colonial tension with Britain","Describe specific laws that angered the colonists","Explain how colonists fought back through boycotts and protests","Define key vocabulary: Tax, Boycott, Taxation Without Representation, Militia"],
+ slides:[
+  {type:"content",heading:"New British Tax Laws",pts:["After the French & Indian War (1754–1763), Britain was deeply in debt.","Britain decided the colonies should help pay for the war.","Stamp Act (1765): Tax on ALL printed paper — newspapers, legal docs.","Townshend Acts (1767): Taxes on paper, glass, paint, and tea.","Colonial slogan: 'No Taxation Without Representation!'"],kt:"Stamp Act",kd:"1765 law taxing all printed paper — a major colonial grievance."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"The Colonists Fight Back",pts:["Boycott: Colonists refused to buy British goods — hurt British businesses badly.","Sons of Liberty: Secret group of patriots who organized protests.","Boston Massacre (1770): British soldiers fired into a crowd — 5 colonists killed.","Boston Tea Party (1773): Colonists dumped 342 chests of British tea into Boston Harbor.","First Continental Congress (1774): Colonial leaders met to organize resistance."],kt:"Boston Tea Party",kd:"December 16, 1773 — Colonists dumped British tea into Boston Harbor."},
+  {type:"mc",qi:1},{type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"Why did Britain start taxing the colonies heavily after 1763?",ch:["Britain wanted to punish the colonies","To pay off debt from the French and Indian War","To build more schools and roads in England","The colonies had asked for more taxes"],c:1},
+  {q:"What did the Stamp Act of 1765 require?",ch:["Colonists to serve in the British military","A tax on all printed paper — newspapers, legal documents, and more","Colonists to stamp their approval on all new laws","A tax on food imported from Britain"],c:1},
+  {q:"What happened during the Boston Tea Party?",ch:["Britain threw away tea the colonists refused to pay for","Colonists dressed as Mohawk Indians and dumped British tea into Boston Harbor","A ship full of tea sank in a storm","The colonies banned all tea drinking"],c:1},
+  {q:"Who said 'Give me liberty or give me death!'?",ch:["Samuel Adams — leader of the Sons of Liberty","George Washington — commander of the colonial army","Benjamin Franklin — diplomat and inventor","Patrick Henry — colonial leader"],c:3}],
+ vocab:[{t:"Tax",d:"Money citizens must pay to the government."},{t:"Boycott",d:"Refusing to buy or use something as a form of protest."},{t:"Taxation Without Representation",d:"Being taxed by a government you have NO vote in."},{t:"Militia",d:"A group of ordinary citizens trained to fight in an emergency."}],
+ sc:[3,0,2,1]},
+
+{id:"F",title:"The Declaration of Independence",
+ goals:["Identify who wrote the Declaration of Independence and when","Explain the key ideas in the Declaration","Describe the short-term and long-term impact of the Declaration","Define key vocabulary: Independence, Unalienable Rights, Grievance, Consent of the Governed"],
+ slides:[
+  {type:"content",heading:"Thomas Paine's 'Common Sense' (1776)",pts:["Thomas Paine argued it was ridiculous for a huge continent to be ruled by a tiny island.","He said it was 'common sense' for the colonies to seek independence.","It was read by hundreds of thousands — and changed many minds."],kt:"Common Sense",kd:"1776 pamphlet by Thomas Paine arguing America should become independent."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"The Big Ideas of the Declaration",pts:["'All men are created equal' — every person has the same basic rights.","People have 'unalienable rights': Life, Liberty, and the Pursuit of Happiness.","Governments exist to PROTECT these rights — not take them away.","If a government fails to protect rights, THE PEOPLE can overthrow it.","Jefferson based these ideas on John Locke's philosophy."],kt:"Thomas Jefferson",kd:"Primary author of the Declaration of Independence and the 3rd President."},
+  {type:"mc",qi:1},{type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"What did Thomas Paine argue in 'Common Sense'?",ch:["Colonists should pay more taxes","Britain was right to control the colonies","It was obvious America should be independent","France should take over governing the colonies"],c:2},
+  {q:"What are the three 'unalienable rights' in the Declaration?",ch:["Speech, religion, and right to vote","Life, liberty, and the pursuit of happiness","Wealth, property, and right to bear arms","Safety, education, and fair taxation"],c:1},
+  {q:"When was the Declaration of Independence officially approved?",ch:["July 4, 1776","July 4, 1783","April 19, 1775","September 3, 1782"],c:0},
+  {q:"Who wrote the Declaration of Independence?",ch:["George Washington","Benjamin Franklin","Thomas Jefferson — based on John Locke's ideas","John Adams"],c:2}],
+ vocab:[{t:"Independence",d:"Freedom from control by another country or government."},{t:"Unalienable Rights",d:"Rights that CANNOT be taken away — life, liberty, and happiness."},{t:"Grievance",d:"A complaint or reason to be upset about something unfair."},{t:"Consent of the Governed",d:"Government power comes from the approval of citizens."}],
+ sc:[2,3,0,1]},
+
+{id:"G",title:"The Revolutionary War",
+ goals:["Describe the beginning of the Revolutionary War","Identify key battles and turning points","Explain how France helped America win independence","Define key vocabulary: Minutemen, Turning Point, Alliance, Loyalist"],
+ slides:[
+  {type:"content",heading:"The War Begins (1775)",pts:["April 18, 1775: Paul Revere's famous 'midnight ride' to warn colonists.","April 19, 1775: First shots fired at Lexington and Concord, Massachusetts.","Minutemen — ordinary farmers — faced the professional British army.","'The shot heard round the world' — the Revolution was on."],kt:"Lexington & Concord",kd:"Site of the first battles of the Revolutionary War — April 19, 1775."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"Key Battles & Turning Points",pts:["Battle of Bunker Hill (1775): Americans proved they could fight bravely.","December 25, 1776: Washington's surprise crossing of the Delaware — victory!","Battle of Saratoga (1777): American victory — convinced France to join America.","Benjamin Franklin traveled to France and secured a formal alliance."],kt:"Battle of Saratoga",kd:"1777 American victory — the turning point that brought France into the war."},
+  {type:"mc",qi:1},
+  {type:"content",heading:"Yorktown & Treaty of Paris",pts:["1781: American and French forces surrounded the British at Yorktown, Virginia.","The French navy blocked British ships from escaping.","British General Cornwallis surrendered — October 19, 1781.","Treaty of Paris (1783): Officially ended the war, recognized American independence."],kt:"Treaty of Paris (1783)",kd:"Peace treaty that ended the Revolutionary War and recognized American independence."},
+  {type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"Where were the FIRST shots of the Revolutionary War fired?",ch:["Boston, during the Boston Massacre","Philadelphia, at the First Continental Congress","At Lexington and Concord in Massachusetts","In Yorktown, Virginia at the final battle"],c:2},
+  {q:"Which battle is considered the TURNING POINT of the Revolutionary War?",ch:["Battle of Bunker Hill","Battle of Saratoga — convinced France to ally with America","Battle of Yorktown — final battle","Crossing the Delaware"],c:1},
+  {q:"What did the Treaty of Paris (1783) accomplish?",ch:["It started the Revolutionary War","Britain officially recognized American independence","It created the alliance with France","It gave Canada to the United States"],c:1},
+  {q:"Who helped America win the Revolutionary War by forming an important alliance?",ch:["Spain — sent weapons and soldiers","France — Benjamin Franklin convinced them to join","Canada — refused to fight for Britain","Germany — hired soldiers for America"],c:1}],
+ vocab:[{t:"Minutemen",d:"Colonial soldiers ready to fight on a minute's notice."},{t:"Turning Point",d:"A key moment in a war that changes the outcome."},{t:"Alliance",d:"A partnership between countries to help each other."},{t:"Loyalist",d:"A colonist who stayed loyal to Britain and opposed independence."}],
+ sc:[1,3,0,2]},
+
+{id:"H",title:"Articles of Confederation",
+ goals:["Explain what the Articles of Confederation were and why they were weak","Identify the major weaknesses of the Articles","Describe how Shays' Rebellion showed the Articles were failing","Define key vocabulary: Articles of Confederation, Confederation, Levy Taxes, Currency"],
+ slides:[
+  {type:"content",heading:"America's First Government (1781)",pts:["The Articles of Confederation were America's first framework for government.","They created a WEAK national government — on purpose.","Founders feared giving one leader too much power (like the King).","Each state had ONE vote in Congress; no president; no national court."],kt:"Articles of Confederation",kd:"America's first constitution (1781) — a deliberately weak national government."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"Weaknesses & Shays' Rebellion",pts:["Congress could NOT collect taxes — had to beg states for money.","No executive or judicial branch.","No common currency — every state had its own money.","Shays' Rebellion (1786): Armed farmers revolted; the government couldn't stop it!","This proved the Articles of Confederation were NOT working."],kt:"Shays' Rebellion",kd:"Armed revolt (1786) that proved the national government was too weak."},
+  {type:"mc",qi:1},{type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"Why did the founders create a WEAK national government in the Articles?",ch:["A strong government would help the economy recover","They wanted America to be like Britain's government","They feared giving one leader too much power after experience with the King","They planned to make it stronger after 10 years"],c:2},
+  {q:"What was a major weakness of the Articles of Confederation?",ch:["The government was too powerful","Congress could not collect taxes from states","The President had too much power","The Supreme Court could overrule Congress"],c:1},
+  {q:"What did Shays' Rebellion PROVE about the Articles of Confederation?",ch:["The government was too harsh on citizens","The national government was too weak to handle a crisis","Farmers had too much power in the new country","The economy was recovering well"],c:1},
+  {q:"What did the Northwest Ordinance of 1787 accomplish?",ch:["It ended Shays' Rebellion","It organized new territories and set rules for new states","It created the first national bank","It declared the Articles a failure"],c:1}],
+ vocab:[{t:"Articles of Confederation",d:"America's first constitution — a weak plan for government (1781)."},{t:"Confederation",d:"A loose group of states working together, each keeping most power."},{t:"Levy Taxes",d:"To officially charge and collect taxes from citizens."},{t:"Currency",d:"Money — coins and bills used to buy and sell things."}],
+ sc:[3,0,2,1]},
+
+{id:"I",title:"The Constitution",
+ goals:["Describe what happened at the Constitutional Convention","Explain the Great Compromise and the 3 branches of government","Identify the key rights protected by the Bill of Rights","Define key vocabulary: Constitution, Amendment, Ratification, Checks & Balances"],
+ slides:[
+  {type:"content",heading:"The Constitutional Convention (1787)",pts:["Delegates from 12 of 13 states met in Philadelphia in 1787.","They decided to write a completely NEW constitution.","Key figures: James Madison, Benjamin Franklin, George Washington.","The Great Compromise: Senate = equal (2 per state); House = based on population."],kt:"Constitutional Convention",kd:"The 1787 meeting in Philadelphia where delegates wrote the U.S. Constitution."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"Three Branches & Checks and Balances",pts:["Legislative Branch — Congress (Senate + House): MAKES the laws.","Executive Branch — The President: CARRIES OUT the laws.","Judicial Branch — Supreme Court: INTERPRETS the laws.","Checks and Balances prevent any branch from becoming too powerful."],kt:"Checks & Balances",kd:"Each branch can limit the power of the other two."},
+  {type:"mc",qi:1},
+  {type:"content",heading:"Ratification & the Bill of Rights",pts:["Federalists: Supported the Constitution — wanted a strong national government.","Anti-Federalists: Feared too much government power — demanded a Bill of Rights.","Deal made: Federalists promised to add a Bill of Rights.","9 of 13 states ratified — Constitution became official in 1788.","First 10 Amendments = the Bill of Rights, protecting individual freedoms."]},
+  {type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"What was the Great Compromise?",ch:["A deal to end the Revolutionary War","An agreement for TWO houses of Congress — Senate (equal) and House (population)","The decision to add a Bill of Rights","The 3/5 Compromise about enslaved people"],c:1},
+  {q:"What does the JUDICIAL branch do?",ch:["Makes the laws","Carries out and enforces the laws","Interprets the laws and decides if they are constitutional","Collects taxes to fund the government"],c:2},
+  {q:"Why did Anti-Federalists oppose the Constitution at first?",ch:["They wanted a stronger national government","They feared it gave the government too much power","They wanted only large states to have power","They believed only wealthy people should vote"],c:1},
+  {q:"Which amendment protects freedom of SPEECH, RELIGION, and PRESS?",ch:["2nd Amendment — right to bear arms","4th Amendment — no unreasonable searches","1st Amendment — freedom of speech, religion, and press","5th Amendment — protection against self-incrimination"],c:2}],
+ vocab:[{t:"Constitution",d:"The supreme law of the United States — the government's rulebook."},{t:"Amendment",d:"A change or addition to the Constitution."},{t:"Ratification",d:"The official vote to approve and accept the Constitution."},{t:"Checks & Balances",d:"Each branch of government can limit the power of the others."}],
+ sc:[2,0,3,1]},
+
+{id:"J",title:"The Early Years",
+ goals:["Describe the key decisions of Washington's presidency","Explain the Louisiana Purchase and Lewis & Clark Expedition","Identify the causes and effects of the War of 1812","Define key vocabulary: Precedent, Judicial Review, Tariff, Nationalism"],
+ slides:[
+  {type:"content",heading:"George Washington & Hamilton's Economic Plan",pts:["Washington became the 1st President in 1789 — set PRECEDENTS for all future presidents.","He served TWO terms then stepped down — a vital democratic tradition.","Hamilton created a National Bank to manage the country's finances.","The Whiskey Rebellion (1794): Washington sent the army to collect taxes — proved government had power."],kt:"Precedent",kd:"An action that sets an example to be followed in the future."},
+  {type:"mc",qi:0},
+  {type:"content",heading:"Jefferson & the Louisiana Purchase",pts:["Thomas Jefferson became the 3rd President in 1801.","In 1803, France offered to sell the Louisiana Territory.","Jefferson bought it for $15 million, DOUBLING the size of the United States!","Lewis & Clark (1804–1806): Explored the new territory, guided by Sacagawea."],kt:"Louisiana Purchase (1803)",kd:"The U.S. bought a massive territory from France for $15 million — doubling America."},
+  {type:"mc",qi:1},
+  {type:"content",heading:"War of 1812, Monroe Doctrine & Jackson",pts:["War of 1812: Britain kept seizing American ships — the U.S. fought back.","Result: Ended in a tie, but boosted American nationalism and pride.","Monroe Doctrine (1823): Warning to Europe — STAY OUT of the Americas.","Indian Removal Act (1830): Jackson forced Native Americans westward — Trail of Tears."]},
+  {type:"mc",qi:2},{type:"mc",qi:3},{type:"vocab"}],
+ questions:[
+  {q:"What important PRECEDENT did Washington set by stepping down after two terms?",ch:["Presidents must live in Virginia like Washington did","The military stays out of politics","Leaders peacefully transfer power — no president rules for life","Vice presidents automatically become the next president"],c:2},
+  {q:"What was the Louisiana Purchase?",ch:["America buying Florida from Spain","Buying a huge territory from France that DOUBLED the U.S. size","Purchasing rights to the Mississippi River","A peace deal for land east of the Mississippi"],c:1},
+  {q:"What was a major CAUSE of the War of 1812?",ch:["A border dispute with Canada","Disagreement about the Constitution","Britain seizing American ships and forcing sailors into their navy","A trade war with France"],c:2},
+  {q:"What was the Trail of Tears?",ch:["A road built from East Coast to Pacific","A path used by Lewis and Clark","The forced march of Native Americans — thousands died","A trail of evidence of corruption"],c:2}],
+ vocab:[{t:"Precedent",d:"An action that sets an example to be followed in the future."},{t:"Judicial Review",d:"The Supreme Court's power to decide if a law is constitutional."},{t:"Tariff",d:"A tax on imported goods to protect American businesses."},{t:"Nationalism",d:"Strong pride and loyalty to your country."}],
+ sc:[3,1,0,2]}
+];
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let studentName = "";
+let currentDeck = null;
+let currentSlideIdx = 0;
+let mcAnswers = {};   // {qi: "A"|"B"|"C"|"D"}
+let vocabAnswers = {}; // {termIdx: "A"|"B"|"C"|"D"}
+let allSlides = [];
+let scoreSubmitted = false;
+
+// Simple localStorage-based score store (no server needed)
+const STORE_KEY = "crowder_scores";
+function getScores() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); } catch { return []; }
+}
+function saveScore(entry) {
+  const scores = getScores();
+  scores.push(entry);
+  localStorage.setItem(STORE_KEY, JSON.stringify(scores));
+}
+function clearScores() {
+  localStorage.removeItem(STORE_KEY);
+}
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════════════════════
+document.getElementById('student-name').addEventListener('input', function() {
+  document.getElementById('btn-start').disabled = this.value.trim().length < 2;
+});
+document.getElementById('student-name').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && this.value.trim().length >= 2) startStudent();
+});
+
+function startStudent() {
+  studentName = document.getElementById('student-name').value.trim();
+  document.getElementById('select-greeting').textContent = `Welcome, ${studentName}!`;
+  buildDeckGrid();
+  showPage('page-select');
+}
+
+// ══════════════════════════════════════════════════════
+//  DECK SELECT
+// ══════════════════════════════════════════════════════
+function buildDeckGrid() {
+  const grid = document.getElementById('deck-grid');
+  grid.innerHTML = DECKS.map(d => `
+    <div class="deck-card" onclick="startDeck('${d.id}')">
+      <div class="deck-badge">${d.id}</div>
+      <div class="deck-info">
+        <div class="deck-title">${d.title}</div>
+        <div class="deck-meta">${d.questions.length} questions · 4 vocabulary</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function startDeck(id) {
+  currentDeck = DECKS.find(d => d.id === id);
+  currentSlideIdx = 0;
+  mcAnswers = {};
+  vocabAnswers = {};
+  scoreSubmitted = false;
+  allSlides = [
+    { type: 'cover' },
+    { type: 'goals' },
+    ...currentDeck.slides
+  ];
+  document.getElementById('quiz-title').textContent = `${currentDeck.id}. ${currentDeck.title}`;
+  renderSlide();
+  showPage('page-quiz');
+}
+
+// ══════════════════════════════════════════════════════
+//  QUIZ ENGINE
+// ══════════════════════════════════════════════════════
+function renderSlide() {
+  const total = allSlides.length;
+  const idx = currentSlideIdx;
+  const slide = allSlides[idx];
+
+  document.getElementById('quiz-slide-count').textContent = `Slide ${idx + 1} of ${total}`;
+  document.getElementById('quiz-progress').style.width = `${(idx / (total - 1)) * 100}%`;
+
+  const mcQ = currentDeck.questions.length;
+  const answered = Object.keys(mcAnswers).length + Object.keys(vocabAnswers).length;
+  const total_q = mcQ + 4;
+  document.getElementById('answer-status').textContent = `${answered}/${total_q} answered`;
+
+  document.getElementById('btn-prev').disabled = idx === 0;
+  const isLast = idx === total - 1;
+  const nextBtn = document.getElementById('btn-next');
+  if (isLast) {
+    nextBtn.textContent = 'Review & Submit →';
+    nextBtn.onclick = goToSubmit;
+    nextBtn.className = 'btn btn-gold';
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = nextSlide;
+    nextBtn.className = 'btn btn-primary';
+  }
+
+  const area = document.getElementById('quiz-slide-area');
+  area.innerHTML = buildSlideHTML(slide);
+}
+
+function buildSlideHTML(slide) {
+  if (slide.type === 'cover') {
+    return `
+      <div class="slide-cover">
+        <div class="eyebrow">Presentation ${currentDeck.id} · Mr. Crowder · US History</div>
+        <h2>${currentDeck.title}</h2>
+        <p>Read through each slide carefully, then answer the check-in questions when they appear.</p>
+        <button class="btn btn-gold" onclick="nextSlide()">Let's Begin →</button>
+      </div>`;
+  }
+  if (slide.type === 'goals') {
+    return `
+      <div class="slide-goals">
+        <div class="goals-header">🎯 Today's Learning Goals</div>
+        <div class="goals-body">
+          <p style="color:var(--muted);font-style:italic;font-size:.9rem;margin-bottom:16px">By the end of this lesson, you will be able to:</p>
+          ${currentDeck.goals.map((g,i) => `
+            <div class="goal-item">
+              <div class="goal-num">${i+1}</div>
+              <div class="goal-text">${g}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+  if (slide.type === 'content') {
+    const kt = slide.kt ? `
+      <div class="key-term-box">
+        <div class="key-term-label">📌 Key Term</div>
+        <div style="height:1px;background:var(--gold);margin-bottom:10px"></div>
+        <div class="key-term-name">${slide.kt}</div>
+        <div class="key-term-def">${slide.kd}</div>
+      </div>` : '';
+    return `
+      <div class="slide-content">
+        <div class="content-header">${slide.heading}</div>
+        <div class="content-body">
+          <div class="content-pts">
+            ${slide.pts.map(p => `<div class="pt-item"><div class="pt-dot"></div><div class="pt-text">${p}</div></div>`).join('')}
+          </div>
+          ${kt}
+        </div>
+      </div>`;
+  }
+  if (slide.type === 'mc') {
+    const q = currentDeck.questions[slide.qi];
+    const chosen = mcAnswers[slide.qi];
+    const feedback = chosen
+      ? `<div class="mc-feedback">Answer recorded: <strong>${chosen}</strong> — you can change it any time before submitting.</div>`
+      : '';
+    return `
+      <div class="slide-mc">
+        <div class="mc-badge">
+          <div class="qnum">Q${slide.qi + 1}</div>
+          <div class="qlabel">Check Your Understanding</div>
+        </div>
+        <div class="mc-question">${q.q}</div>
+        <div class="choices-grid">
+          ${q.ch.map((ch, ci) => {
+            const letter = AN[ci];
+            const sel = chosen === letter;
+            return `<button class="choice-btn${sel ? ' selected' : ''}"
+              style="${sel ? `border-color:${AC[ci]};background:${AC[ci]}18` : ''}"
+              onclick="selectMC(${slide.qi},'${letter}')">
+              <div class="choice-letter" style="background:${AC[ci]}">${letter}</div>
+              <div class="choice-text">${ch}</div>
+            </button>`;
+          }).join('')}
+        </div>
+        ${feedback}
+      </div>`;
+  }
+  if (slide.type === 'vocab') {
+    const defLabels = AN;
+    return `
+      <div class="slide-vocab">
+        <div class="vocab-header">✏️ Vocabulary Matching</div>
+        <div class="vocab-body">
+          <p class="vocab-instruction">Match each term (1–4) with the correct definition (A–D). Click the letter that matches.</p>
+          <div class="vocab-cols">
+            <div>
+              <div class="vocab-col-label">Terms</div>
+              ${currentDeck.vocab.map((v, i) => {
+                const chosen = vocabAnswers[i];
+                return `<div class="vocab-term-row">
+                  <div class="vt-num">${i+1}</div>
+                  <div class="vt-name">${v.t}</div>
+                  <div class="vt-btns">
+                    ${defLabels.map((l, li) => `
+                      <button class="vt-btn${chosen===l?' sel':''}"
+                        style="${chosen===l?`background:${AC[li]};border-color:${AC[li]}`:''}"
+                        onclick="selectVocab(${i},'${l}')">${l}</button>`).join('')}
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>
+            <div>
+              <div class="vocab-col-label">Definitions</div>
+              ${currentDeck.sc.map((termIdx, i) => `
+                <div class="def-row">
+                  <div class="def-letter" style="background:${AC[i]}">${defLabels[i]}</div>
+                  <span>${currentDeck.vocab[termIdx].d}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+  return '';
+}
+
+function selectMC(qi, letter) {
+  mcAnswers[qi] = letter;
+  renderSlide();
+}
+
+function selectVocab(termIdx, letter) {
+  vocabAnswers[termIdx] = letter;
+  renderSlide();
+}
+
+function nextSlide() {
+  if (currentSlideIdx < allSlides.length - 1) {
+    currentSlideIdx++;
+    renderSlide();
+    window.scrollTo(0, 0);
+  }
+}
+
+function prevSlide() {
+  if (currentSlideIdx > 0) {
+    currentSlideIdx--;
+    renderSlide();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  SUBMIT
+// ══════════════════════════════════════════════════════
+function calcScores() {
+  let mc = 0;
+  currentDeck.questions.forEach((q, i) => { if (mcAnswers[i] === AN[q.c]) mc++; });
+  let voc = 0;
+  currentDeck.vocab.forEach((_, i) => {
+    const correct = AN[currentDeck.sc.indexOf(i)];
+    if (vocabAnswers[i] === correct) voc++;
+  });
+  return { mc, voc, total: mc + voc, max: currentDeck.questions.length + 4 };
+}
+
+function gradeColor(p) {
+  if (p >= 90) return 'var(--green)';
+  if (p >= 80) return '#1565C0';
+  if (p >= 70) return 'var(--gold)';
+  if (p >= 60) return '#E65100';
+  return 'var(--red)';
+}
+function gradeLetter(p) {
+  if (p >= 90) return 'A'; if (p >= 80) return 'B';
+  if (p >= 70) return 'C'; if (p >= 60) return 'D'; return 'F';
+}
+function gradeClass(p) {
+  if (p >= 90) return 'grade-a'; if (p >= 80) return 'grade-b';
+  if (p >= 70) return 'grade-c'; if (p >= 60) return 'grade-d'; return 'grade-f';
+}
+
+function goToSubmit() {
+  const scores = calcScores();
+  const mcQ = currentDeck.questions.length;
+  const p = Math.round(scores.total / scores.max * 100);
+
+  document.getElementById('submit-deck-name').textContent =
+    `Presentation ${currentDeck.id}: ${currentDeck.title}`;
+
+  document.getElementById('score-grid').innerHTML = `
+    <div class="score-card">
+      <div class="score-big" style="color:${gradeColor(Math.round(scores.mc/mcQ*100))}">${scores.mc}<span class="score-max">/${mcQ}</span></div>
+      <div class="score-label">Multiple Choice</div>
+      <div class="score-pct" style="color:${gradeColor(Math.round(scores.mc/mcQ*100))}">${Math.round(scores.mc/mcQ*100)}%</div>
+    </div>
+    <div class="score-card">
+      <div class="score-big" style="color:${gradeColor(Math.round(scores.voc/4*100))}">${scores.voc}<span class="score-max">/4</span></div>
+      <div class="score-label">Vocabulary</div>
+      <div class="score-pct" style="color:${gradeColor(Math.round(scores.voc/4*100))}">${Math.round(scores.voc/4*100)}%</div>
+    </div>
+    <div class="score-card" style="border-color:${gradeColor(p)}">
+      <div class="score-big" style="color:${gradeColor(p)}">${scores.total}<span class="score-max">/${scores.max}</span></div>
+      <div class="score-label">Total Score</div>
+      <div class="score-pct" style="color:${gradeColor(p)}">${p}% — ${gradeLetter(p)}</div>
+    </div>`;
+
+  const mcQ2 = currentDeck.questions.length;
+  const answeredMC = Object.keys(mcAnswers).length;
+  const answeredV = Object.keys(vocabAnswers).length;
+  const allDone = answeredMC === mcQ2 && answeredV === 4;
+
+  const warn = document.getElementById('submit-warning');
+  const submitBtn = document.getElementById('btn-submit');
+  const successBox = document.getElementById('submit-success');
+
+  if (!allDone) {
+    warn.style.display = 'block';
+    warn.innerHTML = `Please answer all questions before submitting. You have answered ${answeredMC}/${mcQ2} questions and ${answeredV}/4 vocabulary matches.`;
+    submitBtn.disabled = true;
+  } else {
+    warn.style.display = 'none';
+    submitBtn.disabled = scoreSubmitted;
+  }
+
+  if (scoreSubmitted) {
+    successBox.style.display = 'block';
+    submitBtn.style.display = 'none';
+  } else {
+    successBox.style.display = 'none';
+    submitBtn.style.display = 'block';
+  }
+
+  showPage('page-submit');
+}
+
+function submitScore() {
+  const scores = calcScores();
+  const p = Math.round(scores.total / scores.max * 100);
+  const entry = {
+    name: studentName,
+    deckId: currentDeck.id,
+    deckTitle: currentDeck.title,
+    mcScore: scores.mc,
+    mcMax: currentDeck.questions.length,
+    vocabScore: scores.voc,
+    vocabMax: 4,
+    total: scores.total,
+    max: scores.max,
+    pct: p,
+    grade: gradeLetter(p),
+    submittedAt: new Date().toLocaleString()
+  };
+  saveScore(entry);
+  scoreSubmitted = true;
+  document.getElementById('submit-success').style.display = 'block';
+  document.getElementById('btn-submit').style.display = 'none';
+  document.getElementById('submit-warning').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  TEACHER
+// ══════════════════════════════════════════════════════
+function teacherLogin() {
+  const code = document.getElementById('teacher-code').value.trim();
+  if (code === 'crowder') {
+    document.getElementById('teacher-err').style.display = 'none';
+    loadDashboard();
+    showPage('page-teacher');
+  } else {
+    document.getElementById('teacher-err').style.display = 'block';
+  }
+}
+document.getElementById('teacher-code').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') teacherLogin();
+});
+
+function loadDashboard() {
+  const scores = getScores();
+  document.getElementById('dash-subtitle').textContent =
+    `Mr. Crowder · US History — ${scores.length} submission${scores.length !== 1 ? 's' : ''} collected`;
+
+  document.getElementById('stat-total').textContent = scores.length;
+  if (scores.length > 0) {
+    const avg = Math.round(scores.reduce((a, s) => a + s.pct, 0) / scores.length);
+    const top = Math.max(...scores.map(s => s.pct));
+    const decks = new Set(scores.map(s => s.deckId)).size;
+    document.getElementById('stat-avg').textContent = avg + '%';
+    document.getElementById('stat-top').textContent = top + '%';
+    document.getElementById('stat-decks').textContent = decks + ' / 10';
+  } else {
+    ['stat-avg','stat-top','stat-decks'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+
+  const wrap = document.getElementById('teacher-table-wrap');
+  if (scores.length === 0) {
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <div style="font-weight:600;margin-bottom:8px">No submissions yet</div>
+        <div>Scores will appear here when students submit.</div>
+      </div>`;
+    return;
+  }
+
+  const sorted = [...scores].reverse();
+  wrap.innerHTML = `
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Deck</th>
+            <th>MC</th>
+            <th>Vocab</th>
+            <th>Total</th>
+            <th>Grade</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(s => `
+            <tr>
+              <td style="font-weight:600">${s.name}</td>
+              <td><span class="deck-pill">${s.deckId}</span> ${s.deckTitle}</td>
+              <td>${s.mcScore}/${s.mcMax}</td>
+              <td>${s.vocabScore}/${s.vocabMax}</td>
+              <td style="font-weight:600">${s.total}/${s.max}</td>
+              <td class="${gradeClass(s.pct)}">${s.pct}% — ${s.grade}</td>
+              <td style="font-size:.8rem;color:var(--muted)">${s.submittedAt}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function loadSubmissions() { loadDashboard(); }
+
+function clearAll() {
+  if (!confirm('Delete ALL student scores? This cannot be undone.')) return;
+  clearScores();
+  loadDashboard();
+}
+
+function exportCSV() {
+  const scores = getScores();
+  if (scores.length === 0) return alert('No scores to export yet.');
+  const hdr = ['Name','Deck ID','Deck Title','MC Score','MC Max','Vocab Score','Vocab Max','Total','Max','Percent','Grade','Submitted'];
+  const rows = scores.map(s => [
+    s.name, s.deckId, s.deckTitle, s.mcScore, s.mcMax,
+    s.vocabScore, s.vocabMax, s.total, s.max, s.pct+'%', s.grade, s.submittedAt
+  ]);
+  const csv = [hdr, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'MrCrowder_QuizScores.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
